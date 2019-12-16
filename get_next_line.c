@@ -6,20 +6,44 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/12/04 20:04:50 by nhariman       #+#    #+#                */
-/*   Updated: 2019/12/10 22:54:24 by nhariman      ########   odam.nl         */
+/*   Updated: 2019/12/16 20:11:59 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
+int			read_first_line(char *buffer, char *restbuf, char **line)
+{
+	int i;
+
+	i = 0;
+	while (buffer[i] != '\0' || buffer[i] != '\n')
+		i++;
+	if (buffer[i] == '\n' && !restbuf)
+	{
+		*line = ft_substr(buffer, 0, i);
+		restbuf = ft_substr(buffer, i + 1, (i - BUFFER_SIZE - 1));
+	}
+	if (buffer[i] == '\0')
+		*line = ft_stdrup(buffer);
+	if (!*line || !restbuf)
+		return (free_buffers(buffer, restbuf));
+	return (1);
+}
+
+int			free_buffers(char *buffer, char *restbuf)
+{
+	free(buffer);
+	free(restbuf);
+	return (-1);
+}
+
 int			get_next_line(int fd, char **line)
 {
 	size_t		bytes_read;
 	char		*buffer;
-	size_t		i;
 	static char	*restbuf;
 
-	i = 0;
 	if (!line || fd < 0)
 		return (-1);
 	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
@@ -28,25 +52,17 @@ int			get_next_line(int fd, char **line)
 	buffer[BUFFER_SIZE] = '\0';
 	bytes_read = read(fd, buffer, BUFFER_SIZE);
 	if (bytes_read == -1)
-	{
-		free(buffer);
-		free(restbuf);
-		return (-1);
-	}
+		return (free_buffers);
 	if (bytes_read > 0)
 	{
-		while (buffer[i] != '\0' || buffer[i] != '\n')
-			i++;
-		if (buffer[i] == '\n' && !restbuf)
+		if (!restbuf)
+			read_first_line(buffer, restbuf, line);
+		else
 		{
-			*line = ft_substr(buffer, 0, i);
-			restbuf = ft_substr(buffer, i + 1, (i - BUFFER_SIZE - 1));
+			/* stuff happens here */
 		}
-		if (buffer[i] == '\0')
-			*line = ft_stdrup(buffer);
-		return (1);
 	}
-	return (0);
+	return (bytes_read);
 }
 
 int	main(void)
