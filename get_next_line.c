@@ -6,29 +6,17 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/12/04 20:04:50 by nhariman       #+#    #+#                */
-/*   Updated: 2019/12/16 20:11:59 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/03 21:23:59 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int			read_first_line(char *buffer, char *restbuf, char **line)
+char		*check_restbuf(char **line, char *restbuf)
 {
-	int i;
-
-	i = 0;
-	while (buffer[i] != '\0' || buffer[i] != '\n')
-		i++;
-	if (buffer[i] == '\n' && !restbuf)
-	{
-		*line = ft_substr(buffer, 0, i);
-		restbuf = ft_substr(buffer, i + 1, (i - BUFFER_SIZE - 1));
-	}
-	if (buffer[i] == '\0')
-		*line = ft_stdrup(buffer);
-	if (!*line || !restbuf)
-		return (free_buffers(buffer, restbuf));
-	return (1);
+	ft_strjoin(**line, restbuf);
+	free(restbuf);
+	return (line);
 }
 
 int			free_buffers(char *buffer, char *restbuf)
@@ -43,38 +31,46 @@ int			get_next_line(int fd, char **line)
 	size_t		bytes_read;
 	char		*buffer;
 	static char	*restbuf;
+	int			i;
 
+	bytes_read = 1;
 	if (!line || fd < 0)
 		return (-1);
-	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
-	if (!buffer)
-		return (-1);
-	buffer[BUFFER_SIZE] = '\0';
-	bytes_read = read(fd, buffer, BUFFER_SIZE);
-	if (bytes_read == -1)
-		return (free_buffers);
-	if (bytes_read > 0)
+	*line = ft_strdup("");
+	if (restbuf)
+		check_restbuf(*line, restbuf);
+	while (bytes_read > 0)
 	{
-		if (!restbuf)
-			read_first_line(buffer, restbuf, line);
-		else
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		i = 0;
+		while (buffer[i] != '\n' || buffer[i] != '/0')
+			i++;
+		if (buffer[i] == '\n')
 		{
-			/* stuff happens here */
+			line = ft_strjoin(**line, ft_substr(buffer, 0, i));
+			restbuf = ft_substr(buffer, i + 1, (i - BUFFER_SIZE - 1));
+			break ;
 		}
+		else
+			ft_strjoin(*line, buffer);
 	}
+	if (!*line)
+		free_buffers(buffer, restbuf);
 	return (bytes_read);
 }
 
-int	main(void)
+int		main(void)
 {
 	int	fd;
 	int i;
-	char *line;
+	char **line;
 
 	fd = fopen(test.txt, "r");
-	while (1)
+	i = 1;
+	while (i)
 	{
-		i = get_next_line(fd, line);
+		i = get_next_line(fd, **line);
+		printf("%s/n", *line);
 		printf("%d", i);
 	}
 	return (0);
