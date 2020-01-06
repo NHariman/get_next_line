@@ -6,17 +6,21 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/12/04 20:04:50 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/03 21:23:59 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/06 19:50:56 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <unistd.h>
 #include "get_next_line.h"
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdio.h>
 
 char		*check_restbuf(char **line, char *restbuf)
 {
-	ft_strjoin(**line, restbuf);
+	*line = ft_strjoin(*line, restbuf);
 	free(restbuf);
-	return (line);
+	return (*line);
 }
 
 int			free_buffers(char *buffer, char *restbuf)
@@ -26,52 +30,55 @@ int			free_buffers(char *buffer, char *restbuf)
 	return (-1);
 }
 
+/* end of file can be found by checking if less than */
+/* the BUFFER_SIZE has been read */
 int			get_next_line(int fd, char **line)
 {
-	size_t		bytes_read;
-	char		*buffer;
+	int			bytes_read;
+	char		buffer[BUFFER_SIZE + 1];
 	static char	*restbuf;
 	int			i;
 
 	bytes_read = 1;
+	buffer[BUFFER_SIZE] = '\0';
 	if (!line || fd < 0)
 		return (-1);
 	*line = ft_strdup("");
 	if (restbuf)
-		check_restbuf(*line, restbuf);
+		check_restbuf(line, restbuf);
 	while (bytes_read > 0)
 	{
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
 		i = 0;
-		while (buffer[i] != '\n' || buffer[i] != '/0')
+		while (buffer[i] != '\n' && buffer[i] != '\0')
 			i++;
 		if (buffer[i] == '\n')
 		{
-			line = ft_strjoin(**line, ft_substr(buffer, 0, i));
+			*line = ft_strjoin(*line, ft_substr(buffer, 0, i));
 			restbuf = ft_substr(buffer, i + 1, (i - BUFFER_SIZE - 1));
-			break ;
 		}
 		else
-			ft_strjoin(*line, buffer);
+			*line = ft_strjoin(*line, buffer);
+		if (bytes_read < BUFFER_SIZE)
+			return (0);
+		else
+			return (1);
 	}
-	if (!*line)
-		free_buffers(buffer, restbuf);
-	return (bytes_read);
+	free_buffers(buffer, restbuf);
+	return (-1);
 }
 
 int		main(void)
 {
-	int	fd;
-	int i;
-	char **line;
+	int		fd;
+	char	*line;
+	int		i;
 
-	fd = fopen(test.txt, "r");
-	i = 1;
-	while (i)
-	{
-		i = get_next_line(fd, **line);
-		printf("%s/n", *line);
-		printf("%d", i);
-	}
+	fd = open("test.txt", O_RDONLY);
+	i = get_next_line(fd, &line);
+	printf("%s\n", line);
+	printf("%d\n", i);
+	free(line);
+	close(fd);
 	return (0);
 }
