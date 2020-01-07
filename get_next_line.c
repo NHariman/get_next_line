@@ -6,7 +6,7 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/12/04 20:04:50 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/06 19:50:56 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/07 20:11:37 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,13 @@ int			get_next_line(int fd, char **line)
 		i = 0;
 		while (buffer[i] != '\n' && buffer[i] != '\0')
 			i++;
+		if (buffer[0] == '\n')
+		{
+			restbuf = ft_substr(buffer, 1, (BUFFER_SIZE - 1));
+			if (bytes_read < BUFFER_SIZE)
+				return (0);
+			return (1);
+		}
 		if (buffer[i] == '\n')
 		{
 			*line = ft_strjoin(*line, ft_substr(buffer, 0, i));
@@ -75,10 +82,13 @@ int		main(void)
 	int		i;
 
 	fd = open("test.txt", O_RDONLY);
-	i = get_next_line(fd, &line);
-	printf("%s\n", line);
-	printf("%d\n", i);
-	free(line);
+	i = 1;
+	while (i)
+	{
+		i = get_next_line(fd, &line);
+		printf("%d | %s\n", i, line);
+		free(line);
+	}
 	close(fd);
 	return (0);
 }
