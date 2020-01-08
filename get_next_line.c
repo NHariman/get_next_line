@@ -6,7 +6,7 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/12/04 20:04:50 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/07 20:11:37 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/08 22:01:59 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,15 +18,19 @@
 
 char		*check_restbuf(char **line, char *restbuf)
 {
+	int		i;
+
+	i = 0;
 	*line = ft_strjoin(*line, restbuf);
 	free(restbuf);
 	return (*line);
 }
 
-int			free_buffers(char *buffer, char *restbuf)
+int			free_buffers(char *buffer, char *restbuf, char **line)
 {
 	free(buffer);
 	free(restbuf);
+	free(*line);
 	return (-1);
 }
 
@@ -52,27 +56,25 @@ int			get_next_line(int fd, char **line)
 		i = 0;
 		while (buffer[i] != '\n' && buffer[i] != '\0')
 			i++;
-		if (buffer[0] == '\n')
-		{
-			restbuf = ft_substr(buffer, 1, (BUFFER_SIZE - 1));
-			if (bytes_read < BUFFER_SIZE)
-				return (0);
-			return (1);
-		}
-		if (buffer[i] == '\n')
+		if (buffer[i] == '\n' && i != 0)
 		{
 			*line = ft_strjoin(*line, ft_substr(buffer, 0, i));
-			restbuf = ft_substr(buffer, i + 1, (i - BUFFER_SIZE - 1));
+			restbuf = ft_substr(buffer, i + 1, (BUFFER_SIZE - i - 1));
+			return (1);
 		}
-		else
+		else if (buffer[i] == '\0')
 			*line = ft_strjoin(*line, buffer);
+		else
+			restbuf = ft_substr(buffer, 1, (BUFFER_SIZE - i - 1));
 		if (bytes_read < BUFFER_SIZE)
 			return (0);
-		else
-			return (1);
+		if (!*line)
+		{
+			free_buffers(buffer, restbuf, line);
+			return (-1);
+		}
 	}
-	free_buffers(buffer, restbuf);
-	return (-1);
+	return (1);
 }
 
 int		main(void)
