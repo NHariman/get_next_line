@@ -6,7 +6,7 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/12/04 20:04:41 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/14 17:08:40 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/20 18:01:08 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,14 @@ size_t	ft_strlen(const char *s);
 char	*ft_strdup(const char *s1);
 char	*ft_substr(char const *s, unsigned int start, size_t len);
 char	*ft_strjoin(char const *s1, char const *s2);
-int		free_buffers(char *buffer, char *restbuf);
+//int		free_buffers(char *buffer, char restbuf);
+
+typedef struct	s_gnl
+{
+	int			bytes_read;
+	int			fd;
+	char		*line_read;
+	char		*linebreak;
+}				t_gnl;
 
 #endif

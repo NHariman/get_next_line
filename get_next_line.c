@@ -5,8 +5,8 @@
 /*                                                     +:+                    */
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2019/12/04 20:04:50 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/14 18:35:53 by nhariman      ########   odam.nl         */
+/*   Created: 2020/01/19 17:08:17 by nhariman       #+#    #+#                */
+/*   Updated: 2020/01/20 22:57:18 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,129 +16,112 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-int			ft_find_newline(char *buffer)
+int			find_newline(char *str)
 {
-	int		i;
+	size_t	i;
 
 	i = 0;
-	while (buffer[i] != '\0')
+	while (str[i] != '\0')
 	{
-		if (buffer[i] == '\n')
+		if (str[i] == '\n')
 			return (i);
 		i++;
 	}
 	return (-1);
 }
 
-int		check_restbuf(char **line, char *restbuf)
+char		*read_line(int fd, char *str)
 {
-	int	n_position_restbuf;
+	int		bytes_read;
+	char	buf[BUFFER_SIZE + 1];
 
-	n_position_restbuf = ft_find_newline(restbuf);
-	if (n_position_restbuf == 0)
-	{
-		printf("newline at start, something in restbuf \n");
-		restbuf = ft_substr(restbuf, 1, ft_strlen(restbuf) - 1);
-		return (1);
-	}
-	if (n_position_restbuf != -1)
-	{
-		printf("something in line, something in restbuf \n");
-		*line = ft_strjoin(*line, ft_substr(restbuf, 0,
-				n_position_restbuf));
-		restbuf = ft_substr(restbuf, n_position_restbuf + 1,
-					ft_strlen(restbuf) - n_position_restbuf);
-		return (1);
-	}
-	else
-	{
-		printf("nothing in restbuf \n");
-		*line = ft_strjoin(*line, restbuf);
-		free(restbuf);
-		restbuf = NULL;
-	}
-	return (0);
-}
-
-int			free_buffers(char *buffer, char *restbuf)
-{
-	free(buffer);
-	free(restbuf);
-	buffer = NULL;
-	restbuf = NULL;
-	return (-1);
-}
-
-//if restbuf is not empty, return 1, if restbuf is empty return 0, if 1 is returned, do not read more, if error, return -1
-int			get_next_line(int fd, char **line)
-{
-	int				bytes_read;
-	char			buf[BUFFER_SIZE + 1];
-	static char		*restbuf;
-	int				n_position;
-	int				n_position_restbuf;
-
-	if (!line || fd < 0)
-		return (-1);
-	*line = ft_strdup("");
 	bytes_read = 1;
-	if (restbuf)
-	{
-		n_position_restbuf = ft_find_newline(restbuf);
-		if (n_position_restbuf == 0)
-		{
-			printf("newline at start, something in restbuf \n");
-			restbuf = ft_substr(restbuf, 1, ft_strlen(restbuf) - 1);
-			return (1);
-		}
-		if (n_position_restbuf != -1)
-		{
-			printf("something in line, something in restbuf \n");
-			*line = ft_strjoin(*line, ft_substr(restbuf, 0,
-					n_position_restbuf));
-			restbuf = ft_substr(restbuf, n_position_restbuf + 1,
-						ft_strlen(restbuf) - n_position_restbuf);
-			return (1);
-		}
-		else
-		{
-			printf("nothing in restbuf \n");
-			*line = ft_strjoin(*line, restbuf);
-			free(restbuf);
-			restbuf = NULL;
-		}
-	}
-	while (bytes_read > 0) // put in function, use int? if 1 is returned, return 1, if 0 is returned, read again, if -1 is returned: free buf and restbuf and return -1
+	while (bytes_read > 0)
 	{
 		bytes_read = read(fd, buf, BUFFER_SIZE);
 		buf[bytes_read] = '\0';
-		n_position = ft_find_newline(buf);
-		if (n_position == 0)
+		str = ft_strjoin(str, buf);
+		if (find_newline(buf) > -1)
 		{
-//			printf("read, n_position == 0");
-			restbuf = ft_substr(buf, 1, bytes_read - 1);
-			return (1);
+//			printf("read_line, found newline break:\n %s\n", str);
+			break ;
 		}
-		if (n_position > -1)
-		{
-//			printf("read, newline present \n ");
-			*line = ft_strjoin(*line, ft_substr(buf, 0,
-					n_position));
-			if (buf[n_position + 1] != '\0')
-				restbuf = ft_substr(buf, n_position + 1,
-							bytes_read - n_position);
-			return (1);
-		}
-		else
-		{
-//			printf("read, no newline \n");
-			*line = ft_strjoin(*line, buf);
-		}
+		if (!str)
+			break ;
 	}
-	if (bytes_read == 0)
-		return (0);
-	return (-1);
+	return (str);
 }
+
+int			fill_line(char *str, char **line, char *leftover)
+{
+	int		newline;
+
+	newline = find_newline(str);
+	if (newline != -1)
+	{
+		if (newline != 0)
+			*line = ft_substr(str, 0, newline);
+		leftover = ft_substr(str, newline + 1, ft_strlen(str) - newline - 1);
+		if (!leftover)
+			return (-1);
+//		printf("FILL_LINE if statement:\n LINE: %s\nLEFTOVER: %s\n\n", *line, leftover);
+	}
+	else
+	{
+		*line = ft_strdup(str);
+//		printf("FILL_LINE else statement:\n %s\n\n", *line);
+	}
+	return (newline != -1 && leftover ? 1 : 0);
+}
+// if fails: struct can be static
+int			get_next_line(int fd, char **line)
+{
+	static char		*leftover;
+	char			*str;
+	int				ret;
+	int				newline;
+
+	str = ft_strdup("");
+	*line = ft_strdup("");
+	if (!leftover)
+	{
+//		printf("gnl if statement used\n");
+		str = read_line(fd, str);
+		if (!str)
+			return (-1);
+		ret = fill_line(str, line, leftover);
+	}
+	else
+	{
+//		printf("gnl else statement used\n");
+		str = ft_strjoin(str, leftover);
+		free(leftover);
+		leftover = NULL;
+		ret = fill_line(str, line, leftover);
+//		printf("GNL, print LINE from else statement:\n LINE: %s\nLEFTOVER: %s\n", *line, leftover);
+	}
+	newline = find_newline(str);
+	if (newline != -1)
+		leftover = ft_substr(str, newline + 1, ft_strlen(str) - newline - 1);
+//	printf("GNL, print LINE:\n LINE: %s\nLEFTOVER: %s\n", *line, leftover);
+	return (ret);
+}
+
+/* 
+int			main(void)
+{
+	int		fd;
+	char	*line;
+	int		i;
+
+	i = 1;
+	fd = open("test.txt", O_RDONLY);
+	i = get_next_line(fd, &line);
+	printf("%d | %s\n", i, line);
+//	free(line);
+	return (0);
+} */
+
 
 int			main(void)
 {
@@ -148,11 +131,12 @@ int			main(void)
 
 	fd = open("test.txt", O_RDONLY);
 	i = 1;
-	while (i)
+	while (i == 1)
 	{
 		i = get_next_line(fd, &line);
-		printf("%d | %s\n", i, line);
+		printf("OUTPUT OF GNL: %d | %s\n", i, line);
 		free(line);
+//		i++;
 	}
 	return (0);
-}
+} 

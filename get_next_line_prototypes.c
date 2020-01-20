@@ -240,7 +240,7 @@ int		main(void)
 	char	*line;
 	int		i;
 
-	fd = 0; // open("test.txt", O_RDONLY);
+	fd = open("test.txt", O_RDONLY);
 	i = 1;
 	while (i)
 	{
