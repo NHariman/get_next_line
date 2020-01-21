@@ -6,7 +6,7 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/01/19 17:08:17 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/20 22:57:18 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/21 17:04:27 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,111 +30,86 @@ int			find_newline(char *str)
 	return (-1);
 }
 
-char		*read_line(int fd, char *str)
+char		*read_line(t_gnl gnl)
 {
-	int		bytes_read;
 	char	buf[BUFFER_SIZE + 1];
 
-	bytes_read = 1;
-	while (bytes_read > 0)
+	while (gnl.bytes_read > 0)
 	{
-		bytes_read = read(fd, buf, BUFFER_SIZE);
-		buf[bytes_read] = '\0';
-		str = ft_strjoin(str, buf);
+		gnl.bytes_read = read(gnl.fd, buf, BUFFER_SIZE);
+		buf[gnl.bytes_read] = '\0';
+		gnl.line_read = ft_strjoin(gnl.line_read, buf);
 		if (find_newline(buf) > -1)
-		{
-//			printf("read_line, found newline break:\n %s\n", str);
 			break ;
-		}
-		if (!str)
+		if (!gnl.line_read)
 			break ;
 	}
-	return (str);
+	return (gnl.line_read);
 }
 
-int			fill_line(char *str, char **line, char *leftover)
+int			fill_line(t_gnl gnl, char **line, char *leftover)
 {
 	int		newline;
 
-	newline = find_newline(str);
+	newline = find_newline(gnl.line_read);
 	if (newline != -1)
 	{
 		if (newline != 0)
-			*line = ft_substr(str, 0, newline);
-		leftover = ft_substr(str, newline + 1, ft_strlen(str) - newline - 1);
+			*line = ft_substr(gnl.line_read, 0, newline);
+		leftover = ft_substr(gnl.line_read, newline + 1,
+					ft_strlen(gnl.line_read) - newline - 1);
 		if (!leftover)
 			return (-1);
-//		printf("FILL_LINE if statement:\n LINE: %s\nLEFTOVER: %s\n\n", *line, leftover);
 	}
 	else
-	{
-		*line = ft_strdup(str);
-//		printf("FILL_LINE else statement:\n %s\n\n", *line);
-	}
-	return (newline != -1 && leftover ? 1 : 0);
+		*line = ft_strdup(gnl.line_read);
+	return (newline != -1 && leftover && gnl.bytes_read != 0 ? 1 : 0);
 }
-// if fails: struct can be static
+
 int			get_next_line(int fd, char **line)
 {
 	static char		*leftover;
-	char			*str;
+	t_gnl			gnl;
 	int				ret;
 	int				newline;
 
-	str = ft_strdup("");
+	gnl.line_read = ft_strdup("");
+	gnl.fd = fd;
+	gnl.bytes_read = 1;
 	*line = ft_strdup("");
-	if (!leftover)
+	if (leftover)
 	{
-//		printf("gnl if statement used\n");
-		str = read_line(fd, str);
-		if (!str)
-			return (-1);
-		ret = fill_line(str, line, leftover);
-	}
-	else
-	{
-//		printf("gnl else statement used\n");
-		str = ft_strjoin(str, leftover);
+		gnl.line_read = ft_strjoin(gnl.line_read, leftover);
 		free(leftover);
 		leftover = NULL;
-		ret = fill_line(str, line, leftover);
-//		printf("GNL, print LINE from else statement:\n LINE: %s\nLEFTOVER: %s\n", *line, leftover);
 	}
-	newline = find_newline(str);
+	if (find_newline(gnl.line_read) == -1)
+		gnl.line_read = read_line(gnl);
+	if (!gnl.line_read)
+		return (-1);
+	ret = fill_line(gnl, line, leftover);
+	newline = find_newline(gnl.line_read);
 	if (newline != -1)
-		leftover = ft_substr(str, newline + 1, ft_strlen(str) - newline - 1);
-//	printf("GNL, print LINE:\n LINE: %s\nLEFTOVER: %s\n", *line, leftover);
+		leftover = ft_substr(gnl.line_read, newline + 1,
+					ft_strlen(gnl.line_read) - newline - 1);
 	return (ret);
 }
 
-/* 
 int			main(void)
 {
 	int		fd;
 	char	*line;
 	int		i;
-
-	i = 1;
-	fd = open("test.txt", O_RDONLY);
-	i = get_next_line(fd, &line);
-	printf("%d | %s\n", i, line);
-//	free(line);
-	return (0);
-} */
-
-
-int			main(void)
-{
-	int		fd;
-	char	*line;
-	int		i;
+//	int		gnl;
 
 	fd = open("test.txt", O_RDONLY);
 	i = 1;
 	while (i == 1)
 	{
 		i = get_next_line(fd, &line);
+//		gnl = get_next_line(fd, &line);
 		printf("OUTPUT OF GNL: %d | %s\n", i, line);
+//		printf("OUTPUT OF GNL: %d | %s\n", gnl, line);
 		free(line);
 //		i++;
 	}
