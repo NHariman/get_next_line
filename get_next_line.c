@@ -6,7 +6,7 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/01/19 17:08:17 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/21 17:04:27 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/23 16:09:00 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,12 @@ char		*read_line(t_gnl gnl)
 {
 	char	buf[BUFFER_SIZE + 1];
 
+	gnl.bytes_read = 1;
 	while (gnl.bytes_read > 0)
 	{
 		gnl.bytes_read = read(gnl.fd, buf, BUFFER_SIZE);
+		if (gnl.bytes_read < 0 || BUFFER_SIZE == 0)
+			return (NULL);
 		buf[gnl.bytes_read] = '\0';
 		gnl.line_read = ft_strjoin(gnl.line_read, buf);
 		if (find_newline(buf) > -1)
@@ -47,23 +50,24 @@ char		*read_line(t_gnl gnl)
 	return (gnl.line_read);
 }
 
-int			fill_line(t_gnl gnl, char **line, char *leftover)
+int			fill_line(t_gnl gnl, char **line)
 {
 	int		newline;
+	size_t	remainder;
 
 	newline = find_newline(gnl.line_read);
+	remainder = 0;
 	if (newline != -1)
 	{
 		if (newline != 0)
 			*line = ft_substr(gnl.line_read, 0, newline);
-		leftover = ft_substr(gnl.line_read, newline + 1,
-					ft_strlen(gnl.line_read) - newline - 1);
-		if (!leftover)
-			return (-1);
+		remainder = 1;
 	}
 	else
 		*line = ft_strdup(gnl.line_read);
-	return (newline != -1 && leftover && gnl.bytes_read != 0 ? 1 : 0);
+	if (!*line)
+		return (-1);
+	return (newline != -1 && remainder && gnl.bytes_read < BUFFER_SIZE ? 1 : 0);
 }
 
 int			get_next_line(int fd, char **line)
@@ -75,8 +79,7 @@ int			get_next_line(int fd, char **line)
 
 	gnl.line_read = ft_strdup("");
 	gnl.fd = fd;
-	gnl.bytes_read = 1;
-	*line = ft_strdup("");
+	*line = gnl.line_read;
 	if (leftover)
 	{
 		gnl.line_read = ft_strjoin(gnl.line_read, leftover);
@@ -87,14 +90,15 @@ int			get_next_line(int fd, char **line)
 		gnl.line_read = read_line(gnl);
 	if (!gnl.line_read)
 		return (-1);
-	ret = fill_line(gnl, line, leftover);
+	ret = fill_line(gnl, line);
 	newline = find_newline(gnl.line_read);
 	if (newline != -1)
 		leftover = ft_substr(gnl.line_read, newline + 1,
 					ft_strlen(gnl.line_read) - newline - 1);
-	return (ret);
+	return ((newline != -1 && !leftover) || !*line ? -1 : ret);
 }
 
+/* 
 int			main(void)
 {
 	int		fd;
@@ -102,7 +106,7 @@ int			main(void)
 	int		i;
 //	int		gnl;
 
-	fd = open("test.txt", O_RDONLY);
+	fd = 0;//open("test_3.txt", O_RDONLY);
 	i = 1;
 	while (i == 1)
 	{
@@ -114,4 +118,4 @@ int			main(void)
 //		i++;
 	}
 	return (0);
-} 
+} */
