@@ -6,7 +6,7 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/01/19 17:08:17 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/24 11:48:14 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/26 18:31:55 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,6 +135,9 @@ int			main(void)
 		free(line);
 //		i++;
 	}
+	line = NULL;
+	while (1) {;}
+	close(fd);
 	/*
 	close(fd);
 	fd2 = open("test.txt", O_RDONLY);
