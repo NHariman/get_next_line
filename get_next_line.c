@@ -6,7 +6,7 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/01/19 17:08:17 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/28 21:13:52 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/28 22:37:16 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,7 +134,7 @@ int			main(void)
 //	int		j;
 //	int		gnl;
 
-	fd = open("test.txt", O_RDONLY);
+	fd = open("test_3.txt", O_RDONLY);
 	i = 1;
 //	j = 0;
 	while (i == 1)
