@@ -6,7 +6,7 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/01/19 17:08:17 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/28 20:46:10 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/28 21:13:52 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ int			find_newline(char *str)
 char		*read_line(t_gnl gnl)
 {
 	char	buf[BUFFER_SIZE + 1];
+	char	*tmp;
 
 	gnl.bytes_read = 1;
 	while (gnl.bytes_read > 0)
@@ -41,7 +42,11 @@ char		*read_line(t_gnl gnl)
 		if (gnl.bytes_read < 0)
 			return (NULL);
 		buf[gnl.bytes_read] = '\0';
-		gnl.line_read = ft_strjoin(gnl.line_read, buf);
+		if (!gnl.line_read)
+			gnl.line_read = ft_strdup(buf);
+		tmp = ft_strjoin(gnl.line_read, buf);
+		gnl.line_read = ft_strdup(tmp);
+		free(tmp);
 		if (!gnl.line_read)
 			return (NULL);
 		if (find_newline(buf) > -1)
@@ -89,11 +94,12 @@ char		*fill_leftover(char *str)
 	return (leftover);
 }
 
-int			get_next_line(int fd, char **line)
+int				get_next_line(int fd, char **line)
 {
 	static char		*leftover;
 	t_gnl			gnl;
 	int				ret;
+	int				newline;
 
 	if (fd < 0 || line == NULL || BUFFER_SIZE == 0)
 		return (-1);
@@ -111,9 +117,11 @@ int			get_next_line(int fd, char **line)
 	if (!gnl.line_read)
 		return (-1);
 	ret = fill_line(gnl, line);
-	leftover = fill_leftover(gnl.line_read);
+	newline = find_newline(gnl.line_read);
+	if (newline > -1)
+		leftover = fill_leftover(gnl.line_read);
 	free(gnl.line_read);
-	return ((find_newline(gnl.line_read) != -1 && !leftover) ? -1 : ret);
+	return ((newline != -1 && !leftover) ? -1 : ret);
 }
 
 ///* 

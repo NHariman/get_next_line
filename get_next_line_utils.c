@@ -6,7 +6,7 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/12/04 20:05:03 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/28 20:29:50 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/28 21:09:28 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ char	*ft_strdup(const char *s1)
 	return (str);
 }
 
-char	*ft_strjoin(char const *s1, char const *s2)
+char	*ft_strjoin(char *s1, char *s2)
 {
 	char		*strduo;
 	size_t		i;
@@ -91,5 +91,6 @@ char	*ft_strjoin(char const *s1, char const *s2)
 		j++;
 	}
 	strduo[i + j] = '\0';
+	free(s1);
 	return (strduo);
 }
