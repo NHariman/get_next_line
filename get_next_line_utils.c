@@ -6,7 +6,7 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/12/04 20:05:03 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/20 18:01:20 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/28 20:29:50 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ size_t	ft_strlen(const char *s)
 	size_t length;
 
 	length = 0;
-	while (s[length] != '\0')
+	while (s && s[length] != '\0')
 		length++;
 	return (length);
 }
@@ -77,19 +77,15 @@ char	*ft_strjoin(char const *s1, char const *s2)
 
 	i = 0;
 	j = 0;
-	if (s1 && !s2)
-		return (ft_strdup(s1));
-	if (!s1 && s2)
-		return (ft_strdup(s2));
 	strduo = (char *)malloc((ft_strlen(s1) + ft_strlen(s2) + 1) * sizeof(char));
 	if (!strduo)
 		return (0);
-	while (i < ft_strlen(s1))
+	while (s1 && i < ft_strlen(s1))
 	{
 		strduo[i] = s1[i];
 		i++;
 	}
-	while (j < ft_strlen(s2))
+	while (s2 && j < ft_strlen(s2))
 	{
 		strduo[i + j] = s2[j];
 		j++;

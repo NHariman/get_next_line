@@ -6,7 +6,7 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/01/19 17:08:17 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/26 18:31:55 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/28 20:46:10 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ int			find_newline(char *str)
 	size_t	i;
 
 	i = 0;
-	while (str[i] != '\0')
+	while (str && str[i] != '\0')
 	{
 		if (str[i] == '\n')
 			return (i);
@@ -61,6 +61,8 @@ int			fill_line(t_gnl gnl, char **line)
 	{
 		if (newline != 0)
 			*line = ft_substr(gnl.line_read, 0, newline);
+		else
+			*line = ft_strdup("");
 		remainder = 1;
 	}
 	else
@@ -95,12 +97,12 @@ int			get_next_line(int fd, char **line)
 
 	if (fd < 0 || line == NULL || BUFFER_SIZE == 0)
 		return (-1);
-	gnl.line_read = ft_strdup("");
+	gnl.line_read = NULL;
 	gnl.fd = fd;
 	*line = gnl.line_read;
 	if (leftover)
 	{
-		gnl.line_read = ft_strjoin(gnl.line_read, leftover);
+		gnl.line_read = ft_strdup(leftover);
 		free(leftover);
 		leftover = NULL;
 	}
@@ -110,6 +112,7 @@ int			get_next_line(int fd, char **line)
 		return (-1);
 	ret = fill_line(gnl, line);
 	leftover = fill_leftover(gnl.line_read);
+	free(gnl.line_read);
 	return ((find_newline(gnl.line_read) != -1 && !leftover) ? -1 : ret);
 }
 
@@ -123,7 +126,7 @@ int			main(void)
 //	int		j;
 //	int		gnl;
 
-	fd = open("test_3.txt", O_RDONLY);
+	fd = open("test.txt", O_RDONLY);
 	i = 1;
 //	j = 0;
 	while (i == 1)
