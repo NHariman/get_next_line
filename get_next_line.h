@@ -6,7 +6,7 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/12/04 20:04:41 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/28 21:08:48 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/29 16:14:21 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ typedef struct	s_gnl
 	int			bytes_read;
 	int			fd;
 	char		*line_read;
+	int			newline;
 }				t_gnl;
 
 char			*ft_substr(char const *s, unsigned int start, size_t len);
@@ -29,6 +30,7 @@ char			*ft_strjoin(char *s1, char *s2);
 int				find_newline(char *str);
 char			*read_line(t_gnl gnl);
 int				fill_line(t_gnl gnl, char **line);
+char			*fill_leftover(char *str);
 int				get_next_line(int fd, char **line);
 
 #endif
