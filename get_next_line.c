@@ -6,7 +6,7 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/01/19 17:08:17 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/29 17:36:02 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/31 19:57:45 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,8 @@ static int				find_newline(char *str)
 
 static char				*read_line(t_gnl gnl)
 {
-	char	buf[BUFFER_SIZE + 1];
-	char	*tmp;
+	char		buf[BUFFER_SIZE + 1];
+	char		*tmp;
 
 	gnl.bytes_read = 1;
 	while (gnl.bytes_read > 0)
@@ -44,7 +44,7 @@ static char				*read_line(t_gnl gnl)
 		else
 		{
 			tmp = ft_strjoin(gnl.line_read, buf);
-			gnl.line_read = ft_strdup(tmp);
+			gnl.line_read = (!tmp ? NULL : ft_strdup(tmp));
 			free(tmp);
 		}
 		if (!gnl.line_read)

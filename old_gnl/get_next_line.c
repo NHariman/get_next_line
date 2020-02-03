@@ -6,17 +6,14 @@
 /*   By: nhariman <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/01/19 17:08:17 by nhariman       #+#    #+#                */
-/*   Updated: 2020/01/29 16:11:56 by nhariman      ########   odam.nl         */
+/*   Updated: 2020/01/29 17:36:02 by nhariman      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <unistd.h>
 #include "get_next_line.h"
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdio.h>
 
-int			find_newline(char *str)
+static int				find_newline(char *str)
 {
 	size_t	i;
 
@@ -30,7 +27,7 @@ int			find_newline(char *str)
 	return (-1);
 }
 
-char		*read_line(t_gnl gnl)
+static char				*read_line(t_gnl gnl)
 {
 	char	buf[BUFFER_SIZE + 1];
 	char	*tmp;
@@ -58,7 +55,7 @@ char		*read_line(t_gnl gnl)
 	return (gnl.line_read);
 }
 
-int			fill_line(t_gnl gnl, char **line)
+static int				fill_line(t_gnl gnl, char **line)
 {
 	int		newline;
 	size_t	remainder;
@@ -80,7 +77,7 @@ int			fill_line(t_gnl gnl, char **line)
 	return (newline != -1 && remainder ? 1 : 0);
 }
 
-char		*fill_leftover(char *str)
+static char				*fill_leftover(char *str)
 {
 	int		newline;
 	char	*leftover;
@@ -97,7 +94,7 @@ char		*fill_leftover(char *str)
 	return (leftover);
 }
 
-int				get_next_line(int fd, char **line)
+int						get_next_line(int fd, char **line)
 {
 	static char		*leftover;
 	t_gnl			gnl;
@@ -125,46 +122,3 @@ int				get_next_line(int fd, char **line)
 	free(gnl.line_read);
 	return ((gnl.newline != -1 && !leftover) ? -1 : ret);
 }
-
-/* 
-int			main(void)
-{
-//	int		fd;
-	int		fd2;
-	char	*line;
-	int		i;
-	int		j;
-	int		gnl;
-
-//	fd = 0; //open("test_2.txt", O_RDONLY);
-//	i = 1;
-	j = 0;
-///*
-	while (i == 1)
-	{
-		i = get_next_line(fd, &line);
-//		gnl = get_next_line(fd, &line);
-		printf("OUTPUT OF GNL: %d | %s\n", i, line);
-//		printf("OUTPUT OF GNL: %d | %s\n", gnl, line);
-		free(line);
-//		i++;
-	}
-	line = NULL;
-//	while (1) {;}
-	close(fd); */
-//	/*
-	close(fd); // */
-	fd2 = open("test.txt", O_RDONLY);
-	i = get_next_line(fd2, NULL);
-	printf("OUTPUT OF GNL, LINE IS NULL: %d\n", i);
-	printf("TESTING WITH OPENING AND TRYING TO READ AFTER FILE ENDED\n\n");
-	while (j < 50)
-	{
-		gnl = get_next_line(fd2, &line);
-		printf("OUTPUT OF GNL: %d | %s\n", gnl, line);
-		free(line);
-		j++;
-	} // */
-	return (0);
-} 
-*/
